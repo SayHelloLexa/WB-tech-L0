@@ -93,6 +93,11 @@ func (r *OrderRepository) SaveOrder(ctx context.Context, message []byte) error {
 		return fmt.Errorf("error unmarshaling message: %w", err)
 	}
 
+	err := validateOrder(&orderMsg)
+	if err != nil {
+		return fmt.Errorf("error validating order: %w", err)
+	}
+
 	tx, err := r.db.Begin()
 	if err != nil {
 		return fmt.Errorf("error starting transaction: %w", err)

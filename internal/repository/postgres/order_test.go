@@ -144,3 +144,54 @@ func TestOrderRepository_GetOrderById(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateOrder(t *testing.T) {
+	validOrder := &model.Order{
+		OrderUID:   "123",
+		CustomerID: "cust1",
+		TrackNumber: "TRACK-123",
+		Delivery: model.Delivery{
+			Name:    "John",
+			Phone:   "12345",
+			Address: "Street",
+			City:    "City",
+		},
+		Payment: model.Payment{
+			Transaction: "tx123",
+			Currency:    "USD",
+			Provider:    "bank",
+			Amount:      100,
+		},
+		Items: []model.Item{
+			{ChrtID: 1, Name: "item"},
+		},
+	}
+
+	invalidOrder := &model.Order{
+		OrderUID:   "",               
+		CustomerID: "",               
+		Delivery:   model.Delivery{}, 
+		Payment:    model.Payment{},  
+		Items:      []model.Item{},   
+	}
+
+	tests := []struct {
+		name    string
+		order   *model.Order
+		wantErr bool
+	}{
+		{"valid order", validOrder, false},
+		{"invalid order", invalidOrder, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateOrder(tt.order)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
