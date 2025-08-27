@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Viewer</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #f8f9fa;
+      padding: 20px;
+    }
+    h1 {
+      font-family: sans-serif;
+    }
+    input, button {
+      padding: 6px 10px;
+      font-size: 14px;
+      margin: 5px;
+    }
+    pre {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    ul {
+      list-style-type: none;
+      padding-left: 20px;
+    }
+    li {
+      margin: 2px 0;
+    }
+    .key {
+      font-weight: bold;
+      color: #333;
+    }
+    .value {
+      color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Данные о заказе</h1>
+  <input id="orderId" placeholder="Введите ID заказа order_uid...">
+  <button onclick="fetchOrder()">Получить данные</button>
+
+  <div id="output"></div>
+
+  <script>
+    async function fetchOrder() {
+      const id = document.getElementById("orderId").value;
+      const output = document.getElementById("output");
+      output.innerHTML = "Loading...";
+
+      try {
+        const res = await fetch(`http://localhost:8080/orders/${id}`);
+        if (!res.ok) throw new Error("Network response was not ok");
+        const order = await res.json();
+
+        output.innerHTML = renderObject(order);
+      } catch (err) {
+        output.innerHTML = "Ошибка запроса: " + err;
+      }
+    }
+
+    function renderObject(obj) {
+      if (obj === null) return "<span class='value'>null</span>";
+      if (typeof obj !== "object") return `<span class='value'>${obj}</span>`;
+
+      if (Array.isArray(obj)) {
+        return "<ul>" + obj.map(item => `<li>${renderObject(item)}</li>`).join("") + "</ul>";
+      }
+
+      return "<ul>" + Object.entries(obj).map(([key, value]) =>
+        `<li><span class="key">${key}:</span> ${renderObject(value)}</li>`
+      ).join("") + "</ul>";
+    }
+  </script>
+</body>
+</html>

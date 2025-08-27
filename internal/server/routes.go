@@ -14,7 +14,7 @@ import (
 )
 
 func (s *server) configureRoutes() {
-	s.router.Use(jsonHeaderMiddleware) 
+	s.router.Use(corsMiddleware, jsonHeaderMiddleware) 
 
 	s.router.HandleFunc("/orders/{order_uid}", s.getOrderHandler).Methods(http.MethodGet)
 }
@@ -47,6 +47,12 @@ func (s *server) getOrderHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Order not found in db", http.StatusNotFound)
 			return
 		}
+	}
+
+	if order == nil {
+		http.Error(w, "order not found", http.StatusNotFound)
+		log.Printf("Order %s not found in database", id)
+		return
 	}
 
 	go func() {
